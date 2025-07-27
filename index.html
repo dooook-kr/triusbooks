@@ -15,7 +15,7 @@
         <div class="search-section">
             <form class="search-form" onsubmit="searchBooks(event)">
                 <div class="search-input-group">
-                    <input type="text" id="searchInput" name="query" placeholder="🔍  도서명 또는 저자명으로 검색" value="">
+                    <input type="text" id="searchInput" name="query" placeholder="🔍  도서명, 저자, 키워드로 검색" value="">
                     <button type="submit">검색</button>
                 </div>
             </form>
@@ -23,7 +23,7 @@
 
         <div class="button-group">
             <a href="trius_book_list.csv" class="download-btn" download>📥  전체목록 다운로드</a>
-            <button type="button" class="upload-btn" onclick="showUploadInfo()">도서목록 정보</button>
+            <button type="button" class="upload-btn" onclick="showUploadInfo()">도서 업데이트 방법</button>
         </div>
 
         <div class="books-list">
@@ -206,12 +206,12 @@
 
         // 업로드 정보 표시
         function showUploadInfo() {
-            alert('도서목록 업데이트 안내:\n\n' +
-                  '1. CSV 파일을 trius_book_list.csv로 저장하여 리포지토리에 업로드하세요.\n' +
-                  '2. 파일은 다음 컬럼을 포함해야 합니다:\n' +
+            alert('도서목록을 업데이트 하는 방법:\n\n' +
+                  '1. CSV 파일을 trius_book_list.csv로 저장해 주세요.\n' +
+                  '2. 파일은 다음 컬럼을 순서대로 포함해야 합니다:\n' +
                   '   - 번호, 도서명, 저자, 분류, 추천 대상\n' +
-                  '3. GitHub에서 직접 파일을 교체하거나 Pull Request를 보내주세요.\n\n' +
-                  '궁금한 점이 있으시면 관리자에게 문의해주세요.');
+                  '3. GitHub에서 직접 파일을 교체해 주세요.\n\n' +
+                  '궁금한 점이 있으면 dooook@gmail.com 으로 메일 주세요');
         }
     </script>
 </body>
