@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trius Books</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -15,7 +15,7 @@
         <div class="search-section">
             <form action="/search" method="get" class="search-form">
                 <div class="search-input-group">
-                    <input type="text" name="query" placeholder="🔍  도서명 또는 저자명으로 검색" value="{{ request.args.get('query', '') }}">
+                    <input type="text" name="query" placeholder="🔍  도서명 또는 저자명으로 검색" value="">
                     <button type="submit">검색</button>
                 </div>
             </form>
