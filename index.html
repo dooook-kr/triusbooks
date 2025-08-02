@@ -23,7 +23,8 @@
 
         <div class="button-group">
             <a href="trius_book_list.csv" class="download-btn" download>📥  전체목록 다운로드</a>
-            <button type="button" class="upload-btn" onclick="showUploadInfo()">도서 업데이트 방법</button>
+            <button type="button" class="upload-btn" id="upload-info-btn" onclick="showUploadInfo()">도서 업데이트 방법</button>
+            <button type="button" class="search-download-btn" id="search-download-btn" onclick="downloadSearchResults()" style="display: none;">📋  검색결과 다운로드</button>
         </div>
 
         <div class="books-list">
@@ -31,11 +32,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="sortable" onclick="sortTable(0)">📌  번호 <span class="sort-icon">↕</span></th>
-                            <th class="sortable" onclick="sortTable(1)">📖  도서명 <span class="sort-icon">↕</span></th>
-                            <th class="sortable" onclick="sortTable(2)">✍️  저자 <span class="sort-icon">↕</span></th>
-                            <th class="sortable" onclick="sortTable(3)">📑  분류 <span class="sort-icon">↕</span></th>
-                            <th class="sortable" onclick="sortTable(4)">👥  추천 대상 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(0)">번호 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(1)">도서명 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(2)">저자 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(3)">분류 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(4)">추천 <span class="sort-icon">↕</span></th>
                         </tr>
                     </thead>
                     <tbody id="books-table-body">
@@ -48,6 +49,8 @@
                 </table>
             </div>
         </div>
+        
+        <div id="pagination-container"></div>
     </div>
 
     <footer class="footer">
@@ -60,6 +63,11 @@
         let booksData = [];
         let currentSortColumn = -1;
         let sortAscending = true;
+        let currentPage = 1;
+        let itemsPerPage = 30;
+        let filteredBooks = [];
+        let isSearchActive = false;
+        let currentSearchQuery = '';
 
         // 페이지 로드 시 CSV 데이터를 불러오기
         document.addEventListener('DOMContentLoaded', function() {
@@ -74,7 +82,8 @@
                 
                 if (csvText.trim()) {
                     parseCSV(csvText);
-                    displayBooks(booksData);
+                    filteredBooks = [...booksData];
+                    displayBooksWithPagination();
                 } else {
                     showNoResults('CSV 파일을 찾을 수 없습니다.');
                 }
@@ -102,8 +111,24 @@
             }
         }
 
+        // 페이지네이션과 함께 도서 목록 표시
+        function displayBooksWithPagination() {
+            const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+            
+            if (currentPage > totalPages) {
+                currentPage = 1;
+            }
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const booksToShow = filteredBooks.slice(startIndex, endIndex);
+            
+            displayBooks(booksToShow, startIndex);
+            createPagination(totalPages);
+        }
+
         // 도서 목록을 테이블에 표시
-        function displayBooks(books) {
+        function displayBooks(books, startIndex = 0) {
             const tbody = document.getElementById('books-table-body');
             
             if (books.length === 0) {
@@ -112,14 +137,22 @@
             }
 
             tbody.innerHTML = '';
-            books.forEach(book => {
+            books.forEach((book, index) => {
                 const row = tbody.insertRow();
+                const actualIndex = startIndex + index;
+                row.setAttribute('data-book-index', actualIndex);
+                row.setAttribute('id', `book-row-${actualIndex}`);
+                
+                // 추천대상 처리
+                const recommendation = book['추천 대상'] || '';
+                const recommendationHtml = createRecommendationHtml(recommendation, actualIndex);
+                
                 row.innerHTML = `
                     <td>${book['번호'] || ''}</td>
                     <td>${book['도서명'] || ''}</td>
                     <td>${book['저자'] || ''}</td>
                     <td>${book['분류'] || ''}</td>
-                    <td>${book['추천 대상'] || ''}</td>
+                    <td class="recommendation-cell">${recommendationHtml}</td>
                 `;
             });
         }
@@ -142,18 +175,27 @@
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             
             if (!query) {
-                displayBooks(booksData);
+                filteredBooks = [...booksData];
+                currentPage = 1;
+                isSearchActive = false;
+                currentSearchQuery = '';
+                toggleButtons();
+                displayBooksWithPagination();
                 return;
             }
 
-            const filteredBooks = booksData.filter(book => {
+            filteredBooks = booksData.filter(book => {
                 return (book['도서명'] && book['도서명'].toLowerCase().includes(query)) ||
                        (book['저자'] && book['저자'].toLowerCase().includes(query)) ||
                        (book['분류'] && book['분류'].toLowerCase().includes(query)) ||
                        (book['추천 대상'] && book['추천 대상'].toLowerCase().includes(query));
             });
 
-            displayBooks(filteredBooks);
+            currentPage = 1;
+            isSearchActive = true;
+            currentSearchQuery = document.getElementById('searchInput').value.trim();
+            toggleButtons();
+            displayBooksWithPagination();
         }
 
         // 테이블 정렬 기능
@@ -168,7 +210,7 @@
             const columnNames = ['번호', '도서명', '저자', '분류', '추천 대상'];
             const columnName = columnNames[columnIndex];
 
-            booksData.sort((a, b) => {
+            filteredBooks.sort((a, b) => {
                 let aVal = a[columnName] || '';
                 let bVal = b[columnName] || '';
 
@@ -186,7 +228,8 @@
                 return 0;
             });
 
-            displayBooks(booksData);
+            currentPage = 1;
+            displayBooksWithPagination();
 
             // 정렬 아이콘 업데이트
             updateSortIcons(columnIndex);
@@ -204,6 +247,200 @@
             });
         }
 
+        // 추천대상 HTML 생성 (텍스트 제한 + 더보기 버튼)
+        function createRecommendationHtml(text, index) {
+            if (!text) return '';
+            
+            const maxLength = 20; // 20자로 단축
+            
+            if (text.length <= maxLength) {
+                return text;
+            }
+            
+            return `<button class="more-btn" data-index="${index}" data-text="${text.replace(/"/g, '&quot;')}" onclick="toggleRecommendation(this)">보기</button>`;
+        }
+
+        // 현재 확장된 행 추적
+        let currentExpandedRow = null;
+
+        // 텍스트를 균등한 길이로 나누는 함수
+        function balanceTextLines(text) {
+            if (text.length < 60) {
+                return text; // 짧은 텍스트는 그대로 반환
+            }
+
+            const words = text.split(' ');
+            const totalLength = text.length;
+            
+            // 2-3줄로 나누기 위한 목표 줄 길이 계산
+            let targetLines = totalLength > 120 ? 3 : 2;
+            let idealLineLength = Math.floor(totalLength / targetLines);
+            
+            let lines = [];
+            let currentLine = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                
+                // 남은 단어들 계산
+                const remainingWords = words.slice(i + 1);
+                const remainingText = remainingWords.join(' ');
+                const remainingLines = targetLines - lines.length - 1; // 현재 줄 제외
+                
+                // 줄바꿈 조건 개선
+                let shouldBreak = false;
+                
+                if (remainingLines > 0) {
+                    const avgRemainingLength = remainingText.length / remainingLines;
+                    
+                    // 현재 줄이 이상적 길이에 가깝고, 남은 텍스트도 적절히 분배될 수 있을 때
+                    if (testLine.length >= idealLineLength * 0.8 && 
+                        remainingText.length > idealLineLength * 0.6 &&
+                        avgRemainingLength >= idealLineLength * 0.7 &&
+                        avgRemainingLength <= idealLineLength * 1.4) {
+                        shouldBreak = true;
+                    }
+                    
+                    // 너무 긴 줄 방지 (이상적 길이의 1.3배를 넘으면 강제 줄바꿈)
+                    if (testLine.length > idealLineLength * 1.3 && remainingText.length > 20) {
+                        shouldBreak = true;
+                    }
+                }
+                
+                if (shouldBreak && currentLine) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            
+            // 마지막 줄 추가
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+            
+            // 결과가 1줄이면 다시 시도 (더 짧은 임계값으로)
+            if (lines.length === 1 && totalLength > 80) {
+                return balanceTextLinesAggressive(text);
+            }
+
+            return lines.join('<br>');
+        }
+        
+        // 더 적극적인 줄 나누기 함수
+        function balanceTextLinesAggressive(text) {
+            const words = text.split(' ');
+            const totalLength = text.length;
+            let targetLines = totalLength > 120 ? 3 : 2;
+            let idealLineLength = Math.floor(totalLength / targetLines);
+            
+            let lines = [];
+            let currentLine = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                
+                // 더 적극적인 조건으로 줄바꿈
+                if (currentLine && testLine.length > idealLineLength * 0.7 && i < words.length - 2) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+
+            return lines.join('<br>');
+        }
+
+        // 추천대상 토글 기능 (새로운 행 생성)
+        function toggleRecommendation(buttonElement) {
+            const targetRow = buttonElement.closest('tr');
+            const text = buttonElement.getAttribute('data-text').replace(/&quot;/g, '"');
+            
+            if (!targetRow) return;
+
+            // 이전에 열린 추천대상 행이 있으면 닫기
+            if (currentExpandedRow && currentExpandedRow !== targetRow) {
+                closeRecommendation();
+            }
+
+            // 현재 행에 이미 추천대상이 열려있는지 확인
+            const nextRow = targetRow.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('recommendation-row')) {
+                // 이미 열려있으면 닫기
+                closeRecommendation();
+                return;
+            }
+
+            // 텍스트 그대로 사용 (CSS 양쪽 정렬 적용)
+            const balancedText = text;
+
+            // 새로운 추천대상 행 생성
+            const tbody = targetRow.parentNode;
+            const newRowIndex = Array.from(tbody.children).indexOf(targetRow) + 1;
+            const recommendationRow = tbody.insertRow(newRowIndex);
+            recommendationRow.classList.add('recommendation-row');
+            recommendationRow.innerHTML = `
+                <td colspan="5" class="recommendation-content">
+                    <div class="recommendation-detail">
+                        ${balancedText}
+                    </div>
+                </td>
+            `;
+
+            // 애니메이션을 위해 초기 높이 설정
+            recommendationRow.style.height = '0';
+            recommendationRow.style.opacity = '0';
+
+            // 애니메이션 실행
+            setTimeout(() => {
+                recommendationRow.style.transition = 'all 0.3s ease';
+                recommendationRow.style.height = 'auto';
+                recommendationRow.style.opacity = '1';
+            }, 10);
+
+            buttonElement.textContent = '닫기';
+            buttonElement.classList.add('close-btn');
+            currentExpandedRow = targetRow;
+        }
+
+        // 추천대상 행 닫기
+        function closeRecommendation() {
+            if (currentExpandedRow) {
+                // 모든 추천대상 행 찾아서 제거
+                const recommendationRows = document.querySelectorAll('.recommendation-row');
+                recommendationRows.forEach(row => {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.height = '0';
+                    row.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        if (row.parentNode) {
+                            row.parentNode.removeChild(row);
+                        }
+                    }, 300);
+                });
+
+                // 모든 [닫기] 버튼을 [보기]로 변경
+                const closeButtons = document.querySelectorAll('.more-btn');
+                closeButtons.forEach(btn => {
+                    if (btn.textContent === '닫기') {
+                        btn.textContent = '보기';
+                        btn.classList.remove('close-btn');
+                    }
+                });
+                
+                currentExpandedRow = null;
+            }
+        }
+
         // 업로드 정보 표시
         function showUploadInfo() {
             alert('도서목록을 업데이트 하는 방법:\n\n' +
@@ -212,6 +449,300 @@
                   '   - 번호, 도서명, 저자, 분류, 추천 대상\n' +
                   '3. GitHub에서 직접 파일을 교체해 주세요.\n\n' +
                   '궁금한 점이 있으면 dooook@gmail.com 으로 메일 주세요');
+        }
+
+        // 버튼 표시/숨김 토글
+        function toggleButtons() {
+            const uploadBtn = document.getElementById('upload-info-btn');
+            const searchDownloadBtn = document.getElementById('search-download-btn');
+            
+            if (isSearchActive) {
+                uploadBtn.style.display = 'none';
+                searchDownloadBtn.style.display = 'inline-flex';
+            } else {
+                uploadBtn.style.display = 'inline-flex';
+                searchDownloadBtn.style.display = 'none';
+            }
+        }
+
+        // 검색결과 다운로드
+        function downloadSearchResults() {
+            if (!isSearchActive || filteredBooks.length === 0) {
+                alert('검색 결과가 없습니다.');
+                return;
+            }
+
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+            
+            // HTML 콘텐츠 생성
+            let content = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트리우스 도서 검색결과 - ${currentSearchQuery}</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2c3e50;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .title {
+            color: #34495e;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        .search-info {
+            background: #34495e;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .book-list {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .book-item {
+            border-bottom: 1px solid #ecf0f1;
+            padding: 1.5rem 0;
+            display: flex;
+            gap: 1rem;
+        }
+        .book-item:last-child {
+            border-bottom: none;
+        }
+        .book-number {
+            color: #34495e;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 30px;
+        }
+        .book-content {
+            flex: 1;
+        }
+        .book-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .book-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .book-recommendation {
+            color: #34495e;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border-left: 4px solid #34495e;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin: 2rem 0;
+        }
+        .footer a {
+            color: #34495e;
+            text-decoration: none;
+        }
+        .print-section {
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .print-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 800px;
+        }
+        .print-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+        }
+        .copyright {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 2rem;
+        }
+        @media print {
+            body { background: white; }
+            .header, .book-list, .footer { box-shadow: none; }
+            .print-section { display: none; }
+            .copyright { display: none; }
+        }
+        @media (max-width: 600px) {
+            .search-info {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            .print-btn {
+                font-size: 1rem;
+                padding: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">📚 트리우스 도서 검색결과</div>
+        <div class="subtitle">Trius Books Search Results</div>
+    </div>
+    
+    <div class="search-info">
+        "<strong>${currentSearchQuery}</strong>" 키워드로 검색하신 도서가<br class="mobile-break">
+        ${dateStr} 기준, 총 <strong>${filteredBooks.length}권</strong>이 있네요.<br>
+        <span style="color: #e74c3c; font-weight: bold;">분류번호</span>를 메모하면 책 찾기가 수월할 거예요.<br>
+        책과 함께 즐거운 시간 되세요! 📚
+    </div>
+    
+    <div class="book-list">`;
+
+            filteredBooks.forEach((book, index) => {
+                content += `
+        <div class="book-item">
+            <div class="book-number">${index + 1}.</div>
+            <div class="book-content">
+                <div class="book-title">${book['도서명'] || ''}</div>
+                <div class="book-meta">
+                    저자: <strong>${book['저자'] || ''}</strong> | 
+                    분류: <strong>${book['분류'] || ''}</strong> | 
+                    분류번호: <span style="color: #e74c3c; font-weight: bold;">${book['분류번호'] || ''}</span>
+                </div>
+                <div class="book-recommendation">
+                    <strong>추천대상:</strong> ${book['추천 대상'] || ''}
+                </div>
+            </div>
+        </div>`;
+            });
+
+            content += `
+    </div>
+    
+    <div class="print-section">
+        <button class="print-btn" onclick="window.print()">🖨️ 출력하기</button>
+    </div>
+    
+    <div class="footer">
+        본 도서목록은 입주민 편의를 위해 개인적으로 만들어졌습니다.<br>
+        제안이나 메시지는 <a href="mailto:dooook@gmail.com">dooook@gmail.com</a> 으로 보내주세요.
+    </div>
+    
+    <div class="copyright">
+        © 2025 Agnes Legrand. All rights reserved.
+    </div>
+</body>
+</html>`;
+
+            // 파일 다운로드
+            const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `트리우스도서검색_${currentSearchQuery}_${String(today.getFullYear()).slice(-2)}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // 페이지네이션 컨트롤 생성
+        function createPagination(totalPages) {
+            const container = document.getElementById('pagination-container');
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let paginationHtml = '<div class="pagination">';
+            
+            // 이전 버튼
+            if (currentPage > 1) {
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">◀ 이전</button>`;
+            }
+            
+            // 페이지 번호 계산
+            const maxVisiblePages = 7;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // 끝부분에서 시작점 조정
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // 첫 페이지 표시
+            if (startPage > 1) {
+                paginationHtml += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) {
+                    paginationHtml += '<span class="page-dots">...</span>';
+                }
+            }
+            
+            // 페이지 번호들
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? ' active' : '';
+                paginationHtml += `<button class="page-btn${activeClass}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            // 마지막 페이지 표시
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += '<span class="page-dots">...</span>';
+                }
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // 다음 버튼
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">다음 ▶</button>`;
+            }
+            
+            paginationHtml += '</div>';
+            container.innerHTML = paginationHtml;
+        }
+
+        // 페이지 이동
+        function goToPage(page) {
+            currentPage = page;
+            displayBooksWithPagination();
+            
+            // 페이지 변경 시 확장된 추천대상 닫기
+            closeRecommendation();
+            
+            // 테이블 상단으로 스크롤
+            document.querySelector('.books-list').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
