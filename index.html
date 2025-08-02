@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trius Books</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Trius Books</h1>
+        <p class="site-description">트리우스 라운지에서 읽을 수 있는 도서 목록입니다.<br>개인적으로 만든 것이라 부족하지만 도움이 되었으면 좋겠습니다. 📚</p>
+        
+        <div class="search-section">
+            <form class="search-form" onsubmit="searchBooks(event)">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" name="query" placeholder="🔍  도서명, 저자, 키워드로 검색" value="">
+                    <button type="submit">검색</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="button-group">
+            <a href="trius_book_list.csv" class="download-btn" download>📥  전체목록 다운로드</a>
+            <button type="button" class="upload-btn" onclick="showUploadInfo()">도서 업데이트 방법</button>
+        </div>
+
+        <div class="books-list">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable(0)">📌  번호 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(1)">📖  도서명 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(2)">✍️  저자 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(3)">📑  분류 <span class="sort-icon">↕</span></th>
+                            <th class="sortable" onclick="sortTable(4)">👥  추천 대상 <span class="sort-icon">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="books-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                                📚 도서 목록을 로딩 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2024 Agnes Legrand. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        let booksData = [];
+        let currentSortColumn = -1;
+        let sortAscending = true;
+
+        // 페이지 로드 시 CSV 데이터를 불러오기
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCSVData();
+        });
+
+        // CSV 파일에서 데이터 로드
+        async function loadCSVData() {
+            try {
+                const response = await fetch('trius_book_list.csv');
+                const csvText = await response.text();
+                
+                if (csvText.trim()) {
+                    parseCSV(csvText);
+                    displayBooks(booksData);
+                } else {
+                    showNoResults('CSV 파일을 찾을 수 없습니다.');
+                }
+            } catch (error) {
+                console.error('CSV 로딩 오류:', error);
+                showNoResults('도서 목록을 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // CSV 텍스트를 파싱하여 배열로 변환
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            booksData = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                if (values.length >= headers.length) {
+                    const book = {};
+                    headers.forEach((header, index) => {
+                        book[header] = values[index] || '';
+                    });
+                    booksData.push(book);
+                }
+            }
+        }
+
+        // 도서 목록을 테이블에 표시
+        function displayBooks(books) {
+            const tbody = document.getElementById('books-table-body');
+            
+            if (books.length === 0) {
+                showNoResults('🔍  검색 결과가 없습니다.');
+                return;
+            }
+
+            tbody.innerHTML = '';
+            books.forEach(book => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${book['번호'] || ''}</td>
+                    <td>${book['도서명'] || ''}</td>
+                    <td>${book['저자'] || ''}</td>
+                    <td>${book['분류'] || ''}</td>
+                    <td>${book['추천 대상'] || ''}</td>
+                `;
+            });
+        }
+
+        // 결과 없음 메시지 표시
+        function showNoResults(message) {
+            const tbody = document.getElementById('books-table-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #7f8c8d;">
+                        ${message}
+                    </td>
+                </tr>
+            `;
+        }
+
+        // 검색 기능
+        function searchBooks(event) {
+            event.preventDefault();
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!query) {
+                displayBooks(booksData);
+                return;
+            }
+
+            const filteredBooks = booksData.filter(book => {
+                return (book['도서명'] && book['도서명'].toLowerCase().includes(query)) ||
+                       (book['저자'] && book['저자'].toLowerCase().includes(query)) ||
+                       (book['분류'] && book['분류'].toLowerCase().includes(query)) ||
+                       (book['추천 대상'] && book['추천 대상'].toLowerCase().includes(query));
+            });
+
+            displayBooks(filteredBooks);
+        }
+
+        // 테이블 정렬 기능
+        function sortTable(columnIndex) {
+            if (currentSortColumn === columnIndex) {
+                sortAscending = !sortAscending;
+            } else {
+                currentSortColumn = columnIndex;
+                sortAscending = true;
+            }
+
+            const columnNames = ['번호', '도서명', '저자', '분류', '추천 대상'];
+            const columnName = columnNames[columnIndex];
+
+            booksData.sort((a, b) => {
+                let aVal = a[columnName] || '';
+                let bVal = b[columnName] || '';
+
+                // 번호 컬럼인 경우 숫자로 비교
+                if (columnIndex === 0) {
+                    aVal = parseInt(aVal) || 0;
+                    bVal = parseInt(bVal) || 0;
+                } else {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return sortAscending ? -1 : 1;
+                if (aVal > bVal) return sortAscending ? 1 : -1;
+                return 0;
+            });
+
+            displayBooks(booksData);
+
+            // 정렬 아이콘 업데이트
+            updateSortIcons(columnIndex);
+        }
+
+        // 정렬 아이콘 업데이트
+        function updateSortIcons(activeColumn) {
+            const headers = document.querySelectorAll('th.sortable .sort-icon');
+            headers.forEach((icon, index) => {
+                if (index === activeColumn) {
+                    icon.textContent = sortAscending ? '↑' : '↓';
+                } else {
+                    icon.textContent = '↕';
+                }
+            });
+        }
+
+        // 업로드 정보 표시
+        function showUploadInfo() {
+            alert('도서목록을 업데이트 하는 방법:\n\n' +
+                  '1. CSV 파일을 trius_book_list.csv로 저장해 주세요.\n' +
+                  '2. 파일은 다음 컬럼을 순서대로 포함해야 합니다:\n' +
+                  '   - 번호, 도서명, 저자, 분류, 추천 대상\n' +
+                  '3. GitHub에서 직접 파일을 교체해 주세요.\n\n' +
+                  '궁금한 점이 있으면 dooook@gmail.com 으로 메일 주세요');
+        }
+    </script>
+</body>
+</html>
