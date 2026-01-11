@@ -16,7 +16,7 @@
         <p class="site-description">트리우스 라운지에 구비된 도서 목록입니다.<br>개인적으로 만든 것이라 부족하지만 입주민들께 도움이 되길 바랍니다.</p>
 
         <div class="search-section">
-            <form class="search-form" onsubmit="searchBooks(event)">
+            <form class="search-form" onsubmit="applyFilters(event)">
                 <div class="search-input-group">
                     <input type="text" id="searchInput" name="query" placeholder="🔍  도서명, 저자, 키워드로 검색" value="">
                     <button type="submit" aria-label="도서 검색">검색</button>
@@ -44,8 +44,14 @@
                                     class="sort-icon">↕&#xFE0E;</span></th>
                             <th class="sortable" onclick="sortTable(2)" aria-label="저자로 정렬">저자 <span
                                     class="sort-icon">↕&#xFE0E;</span></th>
-                            <th class="sortable" onclick="sortTable(3)" aria-label="분류로 정렬">분류 <span
-                                    class="sort-icon">↕&#xFE0E;</span></th>
+                            <th class="category-header">
+                                <div class="category-filter-container">
+                                    <span id="category-header-text">분류</span> <span class="filter-icon">▼</span>
+                                    <select id="category-filter" onchange="applyFilters()">
+                                        <option value="">전체</option>
+                                    </select>
+                                </div>
+                            </th>
                             <th class="sortable" onclick="sortTable(4)" aria-label="추천 대상으로 정렬">추천 <span
                                     class="sort-icon">↕&#xFE0E;</span></th>
                         </tr>
@@ -102,6 +108,7 @@
         let filteredBooks = [];
         let isSearchActive = false;
         let currentSearchQuery = '';
+        let currentCategoryFilter = '';
 
         // 페이지 로드 시 CSV 데이터를 불러오기
         document.addEventListener('DOMContentLoaded', function () {
@@ -116,6 +123,7 @@
 
                 if (csvText.trim()) {
                     parseCSV(csvText);
+                    populateCategoryFilter(); // 분류 필터 초기화
                     filteredBooks = [...booksData];
                     displayBooksWithPagination();
                 } else {
@@ -143,6 +151,29 @@
                     booksData.push(book);
                 }
             }
+        }
+
+        // 분류 필터 옵션 채우기
+        function populateCategoryFilter() {
+            const categories = new Set();
+            booksData.forEach(book => {
+                if (book['분류']) {
+                    categories.add(book['분류'].trim());
+                }
+            });
+
+            const sortedCategories = Array.from(categories).sort();
+            const filterSelect = document.getElementById('category-filter');
+
+            // 기존 옵션 초기화 (전체 제외)
+            filterSelect.innerHTML = '<option value="">전체</option>';
+
+            sortedCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                filterSelect.appendChild(option);
+            });
         }
 
         // 페이지네이션과 함께 도서 목록 표시
@@ -206,22 +237,27 @@
             `;
         }
 
-        // 검색 기능
-        function searchBooks(event) {
-            event.preventDefault();
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
 
-            if (!query) {
-                filteredBooks = [...booksData];
-                currentPage = 1;
-                isSearchActive = false;
-                currentSearchQuery = '';
-                toggleButtons();
-                displayBooksWithPagination();
-                return;
-            }
+
+        // 통합 필터 적용 (검색어 + 카테고리)
+        function applyFilters(event) {
+            if (event) event.preventDefault();
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            const categorySelect = document.getElementById('category-filter');
+            const selectedCategory = categorySelect ? categorySelect.value : '';
+
+            updateCategoryHeader(selectedCategory);
 
             filteredBooks = booksData.filter(book => {
+                // 1. 카테고리 필터 확인
+                const categoryMatch = selectedCategory === '' || (book['분류'] && book['분류'].trim() === selectedCategory);
+                if (!categoryMatch) return false;
+
+                // 2. 검색어 확인 (카테고리가 맞으면 검색어도 확인)
+                if (!query) return true;
+
                 return (book['도서명'] && book['도서명'].toLowerCase().includes(query)) ||
                     (book['저자'] && book['저자'].toLowerCase().includes(query)) ||
                     (book['분류'] && book['분류'].toLowerCase().includes(query)) ||
@@ -229,10 +265,27 @@
             });
 
             currentPage = 1;
-            isSearchActive = true;
-            currentSearchQuery = document.getElementById('searchInput').value.trim();
+            isSearchActive = !!query || !!selectedCategory;
+            currentSearchQuery = query;
+            currentCategoryFilter = selectedCategory; // 전역 변수 업데이트 (필요시 사용)
+
             toggleButtons();
             displayBooksWithPagination();
+        }
+
+        // 카테고리 헤더 텍스트 업데이트 (말줄임표 로직)
+        function updateCategoryHeader(selectedCategory) {
+            const headerText = document.getElementById('category-header-text');
+
+            if (!selectedCategory) {
+                headerText.textContent = '분류';
+            } else {
+                if (selectedCategory.length > 2) {
+                    headerText.textContent = selectedCategory.substring(0, 2) + '...';
+                } else {
+                    headerText.textContent = selectedCategory;
+                }
+            }
         }
 
         // 테이블 정렬 기능

@@ -443,6 +443,8 @@ tr:hover {
     .search-download-btn {
         padding: 0.5rem 0.8rem;
         font-size: 0.85rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
     }
 
     .books-list {
