@@ -39,15 +39,15 @@
                     <thead>
                         <tr>
                             <th class="sortable" onclick="sortTable(0)" aria-label="번호로 정렬">번호 <span
-                                    class="sort-icon">↕</span></th>
+                                    class="sort-icon">↕&#xFE0E;</span></th>
                             <th class="sortable" onclick="sortTable(1)" aria-label="도서명으로 정렬">도서명 <span
-                                    class="sort-icon">↕</span></th>
+                                    class="sort-icon">↕&#xFE0E;</span></th>
                             <th class="sortable" onclick="sortTable(2)" aria-label="저자로 정렬">저자 <span
-                                    class="sort-icon">↕</span></th>
+                                    class="sort-icon">↕&#xFE0E;</span></th>
                             <th class="sortable" onclick="sortTable(3)" aria-label="분류로 정렬">분류 <span
-                                    class="sort-icon">↕</span></th>
+                                    class="sort-icon">↕&#xFE0E;</span></th>
                             <th class="sortable" onclick="sortTable(4)" aria-label="추천 대상으로 정렬">추천 <span
-                                    class="sort-icon">↕</span></th>
+                                    class="sort-icon">↕&#xFE0E;</span></th>
                         </tr>
                     </thead>
                     <tbody id="books-table-body">
@@ -277,9 +277,9 @@
             const headers = document.querySelectorAll('th.sortable .sort-icon');
             headers.forEach((icon, index) => {
                 if (index === activeColumn) {
-                    icon.textContent = sortAscending ? '↑' : '↓';
+                    icon.textContent = sortAscending ? '↑\uFE0E' : '↓\uFE0E';
                 } else {
-                    icon.textContent = '↕';
+                    icon.textContent = '↕\uFE0E';
                 }
             });
         }

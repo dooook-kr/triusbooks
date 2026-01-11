@@ -427,7 +427,7 @@ tr:hover {
     .search-form button {
         padding: 0.8rem;
         font-size: 0.9rem;
-        min-width: 90px;
+        min-width: 120px;
     }
 
     .button-group {
