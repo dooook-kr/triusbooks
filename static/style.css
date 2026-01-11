@@ -589,7 +589,7 @@ tr:hover {
 @media (max-width: 768px) {
     .modal-content {
         margin: 10% auto;
-        padding: 1.5rem;
+        padding: 0.5rem;
         width: 95%;
     }
 
