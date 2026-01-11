@@ -800,7 +800,7 @@
 
             // 이전 버튼
             if (currentPage > 1) {
-                paginationHtml += `< button class="page-btn" onclick = "goToPage(${currentPage - 1})" >◀ 이전</button > `;
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">◀ 이전</button>`;
             }
 
             // 페이지 번호 계산
@@ -815,7 +815,7 @@
 
             // 첫 페이지 표시
             if (startPage > 1) {
-                paginationHtml += `< button class="page-btn" onclick = "goToPage(1)" > 1</button > `;
+                paginationHtml += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
                 if (startPage > 2) {
                     paginationHtml += '<span class="page-dots">...</span>';
                 }
@@ -824,7 +824,7 @@
             // 페이지 번호들
             for (let i = startPage; i <= endPage; i++) {
                 const activeClass = i === currentPage ? ' active' : '';
-                paginationHtml += `< button class="page-btn${activeClass}" onclick = "goToPage(${i})" > ${i}</button > `;
+                paginationHtml += `<button class="page-btn${activeClass}" onclick="goToPage(${i})">${i}</button>`;
             }
 
             // 마지막 페이지 표시
@@ -832,12 +832,12 @@
                 if (endPage < totalPages - 1) {
                     paginationHtml += '<span class="page-dots">...</span>';
                 }
-                paginationHtml += `< button class="page-btn" onclick = "goToPage(${totalPages})" > ${totalPages}</button > `;
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
             }
 
             // 다음 버튼
             if (currentPage < totalPages) {
-                paginationHtml += `< button class="page-btn" onclick = "goToPage(${currentPage + 1})" > 다음 ▶</button >`;
+                paginationHtml += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">다음 ▶</button>`;
             }
 
             paginationHtml += '</div>';
