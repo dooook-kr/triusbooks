@@ -322,7 +322,9 @@ tr:hover {
 .sort-icon {
     margin-left: 0.25rem;
     color: #7f8c8d;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
+    vertical-align: sub;
+    display: inline-block;
 }
 
 .no-results {
