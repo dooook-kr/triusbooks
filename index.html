@@ -39,11 +39,11 @@
                     <thead>
                         <tr>
                             <th class="sortable" onclick="sortTable(0)" aria-label="번호로 정렬">번호 <span
-                                    class="sort-icon">↕&#xFE0E;</span></th>
+                                    class="sort-icon">▼</span></th>
                             <th class="sortable" onclick="sortTable(1)" aria-label="도서명으로 정렬">도서명 <span
-                                    class="sort-icon">↕&#xFE0E;</span></th>
+                                    class="sort-icon">▼</span></th>
                             <th class="sortable" onclick="sortTable(2)" aria-label="저자로 정렬">저자 <span
-                                    class="sort-icon">↕&#xFE0E;</span></th>
+                                    class="sort-icon">▼</span></th>
                             <th class="category-header">
                                 <div class="category-filter-container">
                                     <span id="category-header-text">분류</span> <span class="filter-icon">▼</span>
@@ -53,7 +53,7 @@
                                 </div>
                             </th>
                             <th class="sortable" onclick="sortTable(4)" aria-label="추천 대상으로 정렬">추천 <span
-                                    class="sort-icon">↕&#xFE0E;</span></th>
+                                    class="sort-icon">▼</span></th>
                         </tr>
                     </thead>
                     <tbody id="books-table-body">
@@ -330,10 +330,12 @@
             const headers = document.querySelectorAll('th.sortable .sort-icon');
             headers.forEach((icon, index) => {
                 if (index === activeColumn) {
-                    icon.textContent = sortAscending ? '↑\uFE0E' : '↓\uFE0E';
+                    icon.textContent = sortAscending ? '▲' : '▼';
                 } else {
-                    icon.textContent = '↕\uFE0E';
+                    icon.textContent = '▼'; // Default state is triangle
+                    icon.style.opacity = '0.3'; // Dim inactive icons
                 }
+                if (index === activeColumn) icon.style.opacity = '1';
             });
         }
 

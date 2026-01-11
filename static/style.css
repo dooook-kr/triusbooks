@@ -338,10 +338,9 @@ tr:hover {
 @media (max-width: 768px) {
     .sort-icon {
         position: relative;
-        top: 2px;
-        /* Fine-tune vertical position on mobile */
-        font-size: 1rem;
-        /* Slightly smaller icon on mobile */
+        top: 0;
+        font-size: 0.8rem;
+        /* Smaller size for triangle */
     }
 }
 
@@ -475,7 +474,8 @@ tr:hover {
     }
 
     .button-group {
-        margin: 0.8rem 0.5rem;
+        margin: 0.8rem 0;
+        /* Align with search section (remove side margin) */
         padding: 0.4rem;
         gap: 0.3rem;
         flex-wrap: nowrap;
