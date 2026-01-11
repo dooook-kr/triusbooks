@@ -405,6 +405,12 @@ tr:hover {
 @media (max-width: 768px) {
     .container {
         padding: 0.8rem;
+        margin: 0 auto;
+        /* Center container */
+        width: 100%;
+        /* Ensure full width usage */
+        box-sizing: border-box;
+        /* Include padding in width */
     }
 
     h1 {
@@ -421,11 +427,28 @@ tr:hover {
 
     .search-section {
         padding: 1rem;
-        margin: 0 0.5rem;
+        margin: 0;
+        /* Remove side margins to align with container */
+        width: 100%;
+        /* Use full available width */
+        box-sizing: border-box;
     }
 
-    .search-input-group {
-        gap: 0.3rem;
+    /* Reduce table header height on mobile */
+    th,
+    td {
+        padding: 0.5rem 0.3rem;
+        /* Further reduce vertical padding */
+        font-size: 0.85rem;
+        height: auto;
+        /* Allow height to shrink */
+        line-height: 1.2;
+        /* Tighten line height */
+    }
+
+    .category-filter-container {
+        padding: 0.5rem 0.3rem;
+        /* Match th padding */
     }
 
     .search-form input {
