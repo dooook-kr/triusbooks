@@ -429,24 +429,42 @@ tr:hover {
     .search-form button {
         padding: 0.8rem;
         font-size: 0.9rem;
-        min-width: 120px;
+        min-width: 100px;
     }
 
     .button-group {
         margin: 0.8rem 0.5rem;
         padding: 0.4rem;
         gap: 0.3rem;
+        flex-wrap: nowrap;
+        /* 강제로 한 줄 유지 */
     }
 
-    .download-btn,
-    .upload-btn,
-    .search-download-btn {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.85rem;
-        flex: 1;
-        /* 너비를 균등하게 분배 */
+    .download-btn {
+        padding: 0.5rem 0.3rem;
+        /* 패딩 축소 */
+        font-size: 0.8rem;
+        flex: 2;
+        /* 2 비율 */
         width: auto;
         margin-bottom: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .upload-btn,
+    .search-download-btn {
+        padding: 0.5rem 0.3rem;
+        /* 패딩 축소 */
+        font-size: 0.8rem;
+        flex: 1;
+        /* 1 비율 */
+        width: auto;
+        margin-bottom: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .books-list {
