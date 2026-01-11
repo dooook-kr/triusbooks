@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 책 배경 -->
+  <rect x="6" y="6" width="20" height="20" rx="2" fill="#34495e"/>
+  
+  <!-- 책 페이지 효과 -->
+  <rect x="8" y="8" width="16" height="16" rx="1" fill="#ecf0f1"/>
+  
+  <!-- 책 라인들 -->
+  <line x1="10" y1="12" x2="22" y2="12" stroke="#34495e" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="10" y1="15" x2="20" y2="15" stroke="#34495e" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="10" y1="18" x2="22" y2="18" stroke="#34495e" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="10" y1="21" x2="18" y2="21" stroke="#34495e" stroke-width="0.8" stroke-linecap="round"/>
+  
+  <!-- 책 바인딩 -->
+  <rect x="6" y="6" width="3" height="20" rx="1" fill="#2c3e50"/>
+</svg>
