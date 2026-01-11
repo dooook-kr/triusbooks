@@ -94,7 +94,7 @@ h1 {
     font-weight: 600;
     transition: all 0.3s ease;
     white-space: nowrap;
-    min-width: 80px;
+    min-width: 120px;
     text-align: center;
 }
 
@@ -427,7 +427,7 @@ tr:hover {
     .search-form button {
         padding: 0.8rem;
         font-size: 0.9rem;
-        min-width: 60px;
+        min-width: 90px;
     }
 
     .button-group {
