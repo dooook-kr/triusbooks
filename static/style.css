@@ -335,6 +335,16 @@ tr:hover {
     line-height: 1;
 }
 
+@media (max-width: 768px) {
+    .sort-icon {
+        position: relative;
+        top: 2px;
+        /* Fine-tune vertical position on mobile */
+        font-size: 1rem;
+        /* Slightly smaller icon on mobile */
+    }
+}
+
 .no-results {
     text-align: center;
     padding: 3rem;
@@ -405,12 +415,13 @@ tr:hover {
 @media (max-width: 768px) {
     .container {
         padding: 0.8rem;
-        margin: 0 auto;
-        /* Center container */
+        margin-left: auto;
+        /* Explicitly center */
+        margin-right: auto;
         width: 100%;
-        /* Ensure full width usage */
+        max-width: 100%;
+        /* Prevent overflow */
         box-sizing: border-box;
-        /* Include padding in width */
     }
 
     h1 {
