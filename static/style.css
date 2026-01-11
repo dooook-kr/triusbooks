@@ -59,6 +59,25 @@ h1 {
     margin-bottom: 0;
 }
 
+.books-list {
+    margin-bottom: 2rem;
+    /* Reduced from default/implicit if any */
+}
+
+@media (max-width: 768px) {
+    .books-list {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        border-radius: 0;
+        /* Optional: standard look for full width */
+    }
+
+    .table-container {
+        border-radius: 0;
+    }
+}
+
 .search-input-group {
     display: flex;
     gap: 0.5rem;
@@ -76,6 +95,23 @@ h1 {
     transition: all 0.3s ease;
     background: rgba(255, 255, 255, 0.9);
     width: 100%;
+}
+
+.books-list {
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .books-list {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        border-radius: 0;
+    }
+
+    .table-container {
+        border-radius: 0;
+    }
 }
 
 .search-form input:focus {
@@ -672,7 +708,7 @@ tr:hover {
 .footer {
     background: #2c3e50;
     padding: 1rem 0;
-    margin-top: 2rem;
+    margin-top: 1rem;
 }
 
 .footer-content {
