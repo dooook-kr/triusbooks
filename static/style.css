@@ -294,14 +294,21 @@ th {
     background: rgba(236, 240, 241, 0.9);
     color: #2c3e50;
     font-weight: 600;
-    text-align: left;
-    padding: 0.8rem 1rem;
+    text-align: center;
+    /* Center align header text */
+    padding: 0.8rem;
+    /* Consistent padding with td */
+    vertical-align: middle;
+    /* Vertical center */
     border-bottom: 2px solid #e9ecef;
     white-space: nowrap;
 }
 
 td {
-    padding: 1rem;
+    padding: 0.8rem;
+    /* Consistent padding with th */
+    vertical-align: middle;
+    /* Vertical center */
     border-bottom: 1px solid #e9ecef;
     color: #34495e;
 }
@@ -963,8 +970,10 @@ tr:hover {
     height: 100%;
     display: flex;
     align-items: center;
-    padding: 0.8rem 1rem;
-    /* Match modified th padding */
+    justify-content: center;
+    /* Center horizontally */
+    padding: 0.8rem;
+    /* Match th padding */
     cursor: pointer;
 }
 
