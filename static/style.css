@@ -443,8 +443,10 @@ tr:hover {
     .search-download-btn {
         padding: 0.5rem 0.8rem;
         font-size: 0.85rem;
-        width: 100%;
-        margin-bottom: 0.5rem;
+        flex: 1;
+        /* 너비를 균등하게 분배 */
+        width: auto;
+        margin-bottom: 0;
     }
 
     .books-list {
@@ -929,6 +931,24 @@ tr:hover {
     justify-content: center;
 }
 
+/* Category Filter Styles */
+.category-header {
+    position: relative;
+    padding: 0 !important;
+    /* Remove standard padding to let container fill */
+}
+
+.category-filter-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 1.2rem 1rem;
+    /* Match original th padding */
+    cursor: pointer;
+}
+
 .category-filter-container select {
     position: absolute;
     top: 0;
@@ -942,6 +962,8 @@ tr:hover {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    z-index: 10;
+    /* Ensure it's on top */
 }
 
 .modal-overlay {
