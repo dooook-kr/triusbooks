@@ -1,5 +1,7 @@
+[English](./README_en.md) | 한국어
+
 # Trius Lounge Book List
-광명 트리우스 아파트 내 라운지의 도서 목록입니다.
+광명 트리우스 아파트 내 라운지에 구비된 도서를 검색할 수 있습니다. 
 
 ## 1. 기획 의도
 라운지에 수천 권이 책이 들어왔지만, 어떤 책이 있는지 미리 검색할 수가 없어서 활용을 잘 못하고 있었습니다. 이에 AI 로 프로그래밍을 배우기 시작하면서 첫 토이 프로젝트로 라운지의 책을 검색할 수 있는 페이지를 만들었습니다. 
@@ -23,5 +25,5 @@
 * Infrastructure: GitHub Actions & Pages
 
 ## 5. 프로젝트 미리보기
-아래 주소에서 현재 구축된 도서를 과를 확인하실 수 있습니다.
+아래 주소에서 현재 구축된 도서 리스트를 확인할 수 있습니다.
 [https://dooook-kr.github.io/triusbooks/](https://dooook-kr.github.io/triusbooks/)
